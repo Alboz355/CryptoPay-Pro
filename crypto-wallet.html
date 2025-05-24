@@ -1,0 +1,3346 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoPay Pro - Desktop</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background: #0a0b0d;
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+            position: relative;
+        }
+
+        /* Animated Background */
+        .background {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .background::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3), transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(255, 119, 198, 0.3), transparent 50%),
+                        radial-gradient(circle at 40% 20%, rgba(119, 198, 255, 0.3), transparent 50%);
+            animation: drift 20s infinite;
+        }
+
+        @keyframes drift {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(-50px, -50px) rotate(120deg); }
+            66% { transform: translate(50px, -20px) rotate(240deg); }
+        }
+
+        /* Login Screen */
+        .login-screen {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 11, 13, 0.95);
+            backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .login-container {
+            text-align: center;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .login-logo {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .pin-title {
+            font-size: 32px;
+            font-weight: 300;
+            margin-bottom: 40px;
+            letter-spacing: 2px;
+        }
+
+        .pin-dots {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 60px;
+            justify-content: center;
+        }
+
+        .pin-dot {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .pin-dot.filled {
+            background: #fff;
+            transform: scale(1.2);
+            box-shadow: 0 0 20px rgba(255,255,255,0.5);
+        }
+
+        .pin-pad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .pin-button {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+            font-size: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .pin-button:hover {
+            background: rgba(255,255,255,0.1);
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(255,255,255,0.2);
+        }
+
+        .pin-button:active {
+            transform: scale(0.95);
+        }
+
+        /* Main Application */
+        .app-container {
+            display: none;
+            width: 100%;
+            height: 100vh;
+            grid-template-columns: 280px 1fr;
+            grid-template-rows: 80px 1fr;
+            gap: 0;
+        }
+
+        /* Header */
+        .header {
+            grid-column: 1 / -1;
+            background: rgba(28, 28, 30, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            padding: 0 40px;
+            justify-content: space-between;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .app-logo {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .app-name {
+            font-size: 24px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .mode-switcher {
+            display: flex;
+            background: rgba(255,255,255,0.1);
+            border-radius: 30px;
+            padding: 4px;
+        }
+
+        .mode-btn {
+            padding: 10px 30px;
+            border-radius: 26px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: rgba(28, 28, 30, 0.5);
+            border-right: 1px solid rgba(255,255,255,0.1);
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .nav-section {
+            margin-bottom: 30px;
+        }
+
+        .nav-title {
+            font-size: 12px;
+            color: #8e8e93;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 5px;
+            position: relative;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .nav-item.active {
+            background: rgba(102, 126, 234, 0.2);
+            color: #667eea;
+        }
+
+        .nav-icon {
+            font-size: 24px;
+        }
+
+        .nav-badge {
+            position: absolute;
+            right: 20px;
+            background: #ff3b30;
+            color: #fff;
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 40px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        /* Dashboard */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .page-title {
+            font-size: 36px;
+            font-weight: 700;
+        }
+
+        /* Balance Card */
+        .balance-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 30px;
+            padding: 40px;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
+        }
+
+        .balance-info {
+            position: relative;
+            z-index: 1;
+        }
+
+        .balance-label {
+            font-size: 18px;
+            opacity: 0.8;
+            margin-bottom: 10px;
+        }
+
+        .balance-amount {
+            font-size: 56px;
+            font-weight: 700;
+            margin-bottom: 30px;
+            text-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .balance-actions {
+            display: flex;
+            gap: 20px;
+        }
+
+        .action-btn {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: none;
+            color: white;
+        }
+
+        .action-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        /* Crypto Grid */
+        .section-title {
+            font-size: 24px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Header Stats Grid - Nouvelle section pour les stats en haut */
+    .header-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr); /* 3 colonnes pour les 3 stats */
+        gap: 20px; /* Espace entre les cartes */
+        /* Pour aligner avec le contenu principal, on peut ajuster la largeur si nécessaire */
+        max-width: 600px; /* Limite la largeur pour ne pas s'étendre trop */
+        margin-left: auto; /* Centre ou aligne à droite */
+    }
+
+    .stat-card {
+        background: rgba(28, 28, 30, 0.5); /* Même fond que tes crypto-card */
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 20px; /* Bords arrondis */
+        padding: 20px;
+        text-align: center;
+        transition: all 0.3s;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.2); /* Légère ombre */
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px); /* Effet au survol */
+        box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        border-color: rgba(102, 126, 234, 0.5); /* Bordure colorée au survol */
+    }
+
+    .stat-value {
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 5px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .stat-label {
+        font-size: 14px;
+        color: #8e8e93;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* Ajustements pour la réactivité si nécessaire */
+    @media (max-width: 1000px) {
+        .header-stats-grid {
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* S'adapte à la largeur */
+            margin-left: 0; /* Pas de marge automatique pour les petits écrans */
+            width: 100%; /* Prend toute la largeur */
+            margin-top: 20px; /* Ajoute un peu d'espace si on est sur une seule colonne */
+        }
+        .dashboard-header {
+            flex-direction: column; /* Empile titre et stats sur mobile */
+            align-items: flex-start; /* Aligne tout à gauche sur mobile */
+        }
+    }
+
+        .crypto-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .crypto-card {
+            background: rgba(28, 28, 30, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 25px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .crypto-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            border-color: rgba(102, 126, 234, 0.5);
+        }
+
+        .crypto-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .crypto-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .crypto-info {
+            flex: 1;
+        }
+
+        .crypto-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .crypto-symbol {
+            font-size: 14px;
+            color: #8e8e93;
+        }
+
+        .crypto-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .crypto-balance {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .crypto-value {
+            font-size: 16px;
+            color: #8e8e93;
+        }
+
+        /* Calendar Navigation */
+        .calendar-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background: rgba(28, 28, 30, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 15px 30px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .calendar-navigation h4 {
+            font-size: 24px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .calendar-navigation .action-btn {
+            background: rgba(102, 126, 234, 0.2);
+            color: #667eea;
+            border: 1px solid #667eea;
+            padding: 8px 15px;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        .calendar-navigation .action-btn:hover {
+            background: rgba(102, 126, 234, 0.3);
+            transform: translateY(-1px);
+        }
+
+        /* Calendar Grid */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr); /* 7 jours par semaine */
+            gap: 10px;
+            margin-bottom: 30px;
+            background: rgba(28, 28, 30, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .calendar-day-header {
+            font-size: 14px;
+            color: #8e8e93;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .calendar-day {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 10px 0;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 80px; /* Taille fixe pour chaque case */
+            position: relative;
+        }
+
+        .calendar-day:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-2px);
+        }
+
+        .calendar-day.current-month {
+            color: #fff;
+        }
+
+        .calendar-day.other-month {
+            color: #8e8e93;
+            opacity: 0.5;
+        }
+
+        .calendar-day.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            border: 1px solid #667eea;
+        }
+
+        .calendar-day.has-revenue .day-revenue {
+            font-size: 12px;
+            font-weight: normal;
+            color: #34c759; /* Vert pour les revenus */
+            margin-top: 5px;
+        }
+        .calendar-day.selected.has-revenue .day-revenue {
+            color: #fff; /* Revenu en blanc sur fond sélectionné */
+        }
+
+        /* Daily Revenue List */
+        .daily-revenue-list {
+            background: rgba(28, 28, 30, 0.5);
+            border-radius: 20px;
+            padding: 20px;
+            min-height: 150px; /* Pour éviter que le contenu ne saute trop */
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .daily-revenue-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 16px;
+        }
+
+        .daily-revenue-item:last-child {
+            border-bottom: none;
+        }
+
+        .daily-revenue-item .label {
+            color: #8e8e93;
+        }
+
+        .daily-revenue-item .value {
+            font-weight: 600;
+            color: #fff;
+        }
+
+        /* Activity List */
+        .activity-list {
+            background: rgba(28, 28, 30, 0.5);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-item:hover {
+            background: rgba(255,255,255,0.02);
+        }
+
+        .activity-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-right: 20px;
+        }
+
+        .activity-icon.received {
+            background: rgba(52, 199, 89, 0.2);
+            color: #34c759;
+        }
+
+        .activity-icon.sent {
+            background: rgba(255, 59, 48, 0.2);
+            color: #ff3b30;
+        }
+
+        .activity-icon.swap {
+            background: rgba(0, 122, 255, 0.2);
+            color: #007aff;
+        }
+
+        .activity-icon.buy {
+            background: rgba(102, 126, 234, 0.2);
+            color: #667eea;
+        }
+
+        .activity-details {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .activity-subtitle {
+            font-size: 14px;
+            color: #8e8e93;
+        }
+
+        .activity-amount {
+            text-align: right;
+        }
+
+        .activity-crypto {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .activity-value {
+            font-size: 14px;
+            color: #8e8e93;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            animation: fadeIn 0.3s;
+        }
+
+        .modal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1c1c1e;
+            border-radius: 30px;
+            padding: 40px;
+            min-width: 500px;
+            max-width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translate(-50%, -40%); opacity: 0; }
+            to { transform: translate(-50%, -50%); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .modal-title {
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 20px;
+            color: white;
+            border: none;
+        }
+
+        .close-btn:hover {
+            background: rgba(255,255,255,0.2);
+            transform: rotate(90deg);
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            font-size: 14px;
+            color: #8e8e93;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .input-field {
+            width: 100%;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 15px;
+            color: #fff;
+            font-size: 18px;
+            transition: all 0.3s;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255,255,255,0.08);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 30px;
+            color: white;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        /* TPE Specific Styles */
+        .tpe-dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .invoice-section {
+            background: rgba(28, 28, 30, 0.5);
+            border-radius: 20px;
+            padding: 30px;
+        }
+
+        .currency-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .currency-tab {
+            flex: 1;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid transparent;
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .currency-tab.active {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.2);
+        }
+
+        .crypto-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .crypto-option {
+            padding: 15px 10px;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid transparent;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 12px;
+        }
+
+        .crypto-option:hover {
+            background: rgba(255,255,255,0.08);
+        }
+
+        .crypto-option.active {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.2);
+        }
+
+        .conversion-settings {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .toggle-switch {
+            width: 50px;
+            height: 30px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: #34c759;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 26px;
+            height: 26px;
+            background: #fff;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: all 0.3s;
+        }
+
+        .toggle-switch.active::after {
+            left: 22px;
+        }
+
+        .conversion-option {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .conversion-option.active {
+            background: rgba(102, 126, 234, 0.2);
+            border: 1px solid #667eea;
+        }
+
+        .conversion-radio {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #667eea;
+            margin-right: 15px;
+            position: relative;
+        }
+
+        .conversion-option.active .conversion-radio::after {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #667eea;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .qr-container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 20px;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 18px;
+            border-radius: 10px;
+        }
+
+        /* Pending Swaps */
+        .pending-swaps {
+            background: rgba(28, 28, 30, 0.5);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .pending-swap-item {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .pending-swap-item:hover {
+            background: rgba(255,255,255,0.08);
+        }
+
+        .swap-info {
+            flex: 1;
+        }
+
+        .swap-amount {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .swap-time {
+            font-size: 14px;
+            color: #8e8e93;
+        }
+
+        .swap-action-btn {
+            background: #667eea;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            border: none;
+        }
+
+        .swap-action-btn:hover {
+            background: #7650ea;
+            transform: scale(1.05);
+        }
+
+        /* Notifications */
+        .notification-container {
+            position: fixed;
+            top: 100px;
+            right: 40px;
+            z-index: 3000;
+        }
+
+        .notification {
+            background: #1c1c1e;
+            border-radius: 15px;
+            padding: 20px 30px;
+            margin-bottom: 15px;
+            min-width: 300px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            border-left: 4px solid #34c759;
+            animation: slideInRight 0.3s ease-out;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .notification.error {
+            border-left-color: #ff3b30;
+        }
+
+        .notification.info {
+            border-left-color: #007aff;
+        }
+
+        .notification-icon {
+            font-size: 24px;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .notification-message {
+            font-size: 14px;
+            color: #8e8e93;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .crypto-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+            .tpe-dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+            .sidebar {
+                display: none;
+            }
+            .main-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background"></div>
+    
+    <!-- Login Screen -->
+    <div class="login-screen" id="loginScreen">
+        <div class="login-container">
+            <div class="login-logo">💳</div>
+            <div class="pin-title">Entrez votre code PIN</div>
+            <div class="pin-dots" id="pinDotsContainer"></div>
+            <div class="pin-pad">
+                <div class="pin-button" onclick="addPin('1')">1</div>
+                <div class="pin-button" onclick="addPin('2')">2</div>
+                <div class="pin-button" onclick="addPin('3')">3</div>
+                <div class="pin-button" onclick="addPin('4')">4</div>
+                <div class="pin-button" onclick="addPin('5')">5</div>
+                <div class="pin-button" onclick="addPin('6')">6</div>
+                <div class="pin-button" onclick="addPin('7')">7</div>
+                <div class="pin-button" onclick="addPin('8')">8</div>
+                <div class="pin-button" onclick="addPin('9')">9</div>
+                <div></div>
+                <div class="pin-button" onclick="addPin('0')">0</div>
+                <div class="pin-button delete" onclick="deletePin()">⌫</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div class="app-container" id="appContainer">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo-section">
+                <div class="app-logo">💳</div>
+                <div class="app-name">CryptoPay Pro</div>
+            </div>
+            
+            <div class="header-actions">
+                <div class="mode-switcher">
+                    <div class="mode-btn active" onclick="switchMode('wallet')">Wallet</div>
+                    <div class="mode-btn" onclick="switchMode('tpe')">Mode TPE</div>
+                </div>
+                
+                <div class="user-section">
+                  <div onclick="openProfileSettings()" style="cursor: pointer;"> <div style="font-size: 14px; color: #8e8e93;">Bonjour,</div>
+                      <div style="font-size: 16px; font-weight: 600;" id="userNameDisplay">Alexandre</div>
+                  </div>
+                  <div class="user-avatar" onclick="openProfileSettings()" style="cursor: pointer;">👤</div> <button class="action-btn" onclick="logout()" style="background: rgba(255,59,48,0.2); color: #ff3b30; border: none; padding: 10px 15px; border-radius: 10px; font-size: 14px; margin-left: 20px;">
+                      Déconnexion
+                  </button>
+              </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar"></div>
+
+        <!-- Main Content -->
+        <div class="main-content" id="mainContent"></div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle"></h2>
+                <div class="close-btn" onclick="closeModal()">✕</div>
+            </div>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <!-- Notifications -->
+    <div class="notification-container" id="notificationContainer"></div>
+
+    <script src="https://widget.mtpelerin.com/mtp-widget.js"></script>
+
+    <script>
+        // Application State
+        let app = {
+            pin: '',
+            currentMode: 'wallet',
+            currentView: 'dashboard',
+            selectedCurrency: 'CHF',
+            selectedCrypto: 'BTC',
+            autoConvert: false,
+            convertTiming: 'never',
+            balance: {
+                CHF: 25420.50,
+                CHFM: 1500,
+                BTC: 0.5823,
+                LIGHTNING: 0.0234,
+                ETH: 2.3456,
+                USDC: 5000,
+                USDT: 3200,
+                POLYGON: 850,
+                SUI: 320,
+                ALGORAND: 1500,
+                XRP: 800,
+                BNB: 5.2789,
+                ADA: 3452.33,
+                DOT: 234.56,
+                MATIC: 1234.89
+            },
+            cryptoPrices: {
+                CHF: 1,
+                CHFM: 1.00,
+                BTC: 42350,
+                LIGHTNING: 42350,
+                ETH: 2456,
+                USDC: 1.01,
+                USDT: 1.00,
+                POLYGON: 0.85,
+                SUI: 1.45,
+                ALGORAND: 0.32,
+                XRP: 0.58,
+                BNB: 312,
+                ADA: 0.52,
+                DOT: 7.23,
+                MATIC: 0.89
+            },
+            activities: [],
+            tpeTransactions: [],
+            pendingSwaps: [],
+            swapsRealized: [],
+            settings: {
+                userName: 'Alexandre', // <-- AJOUTE CETTE LIGNE
+                pinLength: 5,
+                pin: '12345',
+                autoLock: true,
+                notifications: true,
+                darkMode: true,
+                currency: 'CHF',
+                language: 'fr'
+            },
+             
+        };
+
+        // Variables globales pour le calendrier (déplacées ici)
+        let currentCalendarViewDate = new Date(); // La date du mois actuellement affiché dans le calendrier
+        let selectedCalendarDay = null; // Le jour actuellement sélectionné dans le calendrier
+
+        function updatePinDots() {
+          const pinDotsContainer = document.getElementById('pinDotsContainer');
+          // Si le conteneur n'existe pas encore (par ex. si l'app est déjà lancée), on ne fait rien
+          if (!pinDotsContainer) return;
+
+          // On vide tout ce qu'il y a dans le conteneur des points
+          pinDotsContainer.innerHTML = '';
+
+          // On crée les points un par un, selon la longueur définie dans app.settings.pinLength
+          for (let i = 1; i <= app.settings.pinLength; i++) {
+            const dot = document.createElement('div'); // Crée un nouveau point (une petite boîte)
+            dot.className = 'pin-dot'; // Lui donne le style "pin-dot"
+            dot.id = `dot${i}`; // Lui donne un ID unique (dot1, dot2, etc.)
+            pinDotsContainer.appendChild(dot); // Ajoute le point au conteneur
+          }
+
+          // Si l'utilisateur a déjà tapé des chiffres (par ex. après une erreur),
+          // on remplit les points correspondants.
+          for (let i = 1; i <= app.pin.length; i++) {
+            const filledDot = document.getElementById(`dot${i}`);
+            if (filledDot) { // On vérifie que le point existe avant de le manipuler
+              filledDot.classList.add('filled');
+            }
+          }
+        }
+
+        // Fonction pour générer le calendrier
+        function generateCalendar(date) {
+            const calendarGrid = document.getElementById('calendarGrid');
+                if (!calendarGrid) return; // S'assurer que le conteneur existe
+
+                calendarGrid.innerHTML = ''; // Vide le calendrier existant
+
+                const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+                                    "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+                const dayNames = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
+
+                document.getElementById('currentMonthYear').textContent = `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
+
+                // Ajout des jours de la semaine (Lun, Mar...)
+                dayNames.forEach(day => {
+                    const header = document.createElement('div');
+                    header.className = 'calendar-day-header';
+                    header.textContent = day;
+                    calendarGrid.appendChild(header);
+                });
+
+                const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+                const lastDayOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+                const daysInMonth = lastDayOfMonth.getDate();
+
+                // Calcul du décalage pour le premier jour du mois (0 pour Dim, 1 pour Lun...)
+                // Ajustement pour que Lundi soit le début de la semaine (0 pour Dim, 1 pour Lun, ..., 6 pour Sam)
+                let startDay = firstDayOfMonth.getDay();
+                if (startDay === 0) startDay = 7; // Si c'est dimanche (0), on le met à 7 pour le positionner après samedi
+                startDay--; // On décrémente pour que Lundi (1) devienne 0, Mardi (2) devienne 1, etc.
+
+                // Remplir les jours du mois précédent pour le décalage
+                for (let i = 0; i < startDay; i++) {
+                    const emptyDay = document.createElement('div');
+                    emptyDay.className = 'calendar-day other-month';
+                    calendarGrid.appendChild(emptyDay);
+                }
+
+                // Remplir les jours du mois en cours
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const currentDay = new Date(date.getFullYear(), date.getMonth(), day);
+                    const dayElement = document.createElement('div');
+                    dayElement.className = 'calendar-day current-month';
+                    dayElement.textContent = day;
+                    dayElement.dataset.date = currentDay.toISOString().split('T')[0]; // Stocke la date au format YYYY-MM-DD
+
+                    // Vérifier si ce jour a des transactions pour afficher le revenu
+                    const dailyRevenue = calculateDailyRevenue(currentDay);
+                    if (dailyRevenue > 0) {
+                        dayElement.classList.add('has-revenue');
+                        const revenueSpan = document.createElement('span');
+                        revenueSpan.className = 'day-revenue';
+                        revenueSpan.textContent = formatCurrency(dailyRevenue) + ' CHF';
+                        dayElement.appendChild(revenueSpan);
+                    }
+
+                    // Mettre en surbrillance le jour sélectionné
+                    if (selectedCalendarDay && currentDay.toDateString() === selectedCalendarDay.toDateString()) {
+                        dayElement.classList.add('selected');
+                    }
+
+                    dayElement.onclick = () => selectDay(currentDay);
+                    calendarGrid.appendChild(dayElement);
+                }
+
+                // Remplir les jours du mois suivant pour compléter la dernière semaine
+                const totalCells = startDay + daysInMonth;
+                const remainingCells = (7 - (totalCells % 7)) % 7; // Calcul correct pour compléter la ligne
+
+                for (let i = 0; i < remainingCells; i++) {
+                    const emptyDay = document.createElement('div');
+                    emptyDay.className = 'calendar-day other-month';
+                    calendarGrid.appendChild(emptyDay);
+                }
+            }
+
+            // Fonction pour changer de mois dans le calendrier
+            function changeMonth(delta) {
+                currentCalendarViewDate.setMonth(currentCalendarViewDate.getMonth() + delta);
+                generateCalendar(currentCalendarViewDate);
+                updateDailyRevenueList(); // Met à jour la liste des revenus pour le mois si pas de jour sélectionné
+            }
+
+            // Fonction pour sélectionner un jour et afficher ses détails
+            function selectDay(date) {
+                // Désélectionner le jour précédent
+                if (selectedCalendarDay) {
+                    const prevSelectedElement = document.querySelector(`.calendar-day[data-date="${selectedCalendarDay.toISOString().split('T')[0]}"]`);
+                    if (prevSelectedElement) {
+                        prevSelectedElement.classList.remove('selected');
+                    }
+                }
+
+                selectedCalendarDay = date; // Mettre à jour le jour sélectionné
+                const currentSelectedElement = document.querySelector(`.calendar-day[data-date="${selectedCalendarDay.toISOString().split('T')[0]}"]`);
+                if (currentSelectedElement) {
+                    currentSelectedElement.classList.add('selected');
+                }
+
+                updateDailyRevenueList(); // Met à jour la liste avec les transactions du jour sélectionné
+            }
+
+            // Fonction pour calculer les revenus d'une journée donnée
+            function calculateDailyRevenue(date) {
+                const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0);
+                const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59);
+
+                let dailyTotal = 0;
+                app.tpeTransactions.forEach(tx => {
+                    const txDate = new Date(tx.date); // S'assurer que c'est bien un objet Date
+                    if (tx.status === 'completed' && txDate >= startOfDay && txDate <= endOfDay) {
+                        dailyTotal += tx.amount;
+                    }
+                });
+                return dailyTotal;
+            }
+
+            // Fonction pour mettre à jour la liste des revenus journaliers (sous le calendrier)
+            function updateDailyRevenueList() {
+                const dailyRevenueList = document.getElementById('dailyRevenueList');
+                if (!dailyRevenueList) return;
+
+                let content = '';
+                if (selectedCalendarDay) {
+                    // Afficher les détails pour le jour sélectionné
+                    const startOfDay = new Date(selectedCalendarDay.getFullYear(), selectedCalendarDay.getMonth(), selectedCalendarDay.getDate(), 0, 0, 0);
+                    const endOfDay = new Date(selectedCalendarDay.getFullYear(), selectedCalendarDay.getMonth(), selectedCalendarDay.getDate(), 23, 59, 59);
+
+                    const transactionsToday = app.tpeTransactions.filter(tx => {
+                        const txDate = new Date(tx.date);
+                        return tx.status === 'completed' && txDate >= startOfDay && txDate <= endOfDay;
+                    });
+
+                    if (transactionsToday.length > 0) {
+                        const totalToday = calculateDailyRevenue(selectedCalendarDay);
+                        content += `
+                            <div class="daily-revenue-item">
+                                <span class="label">Revenu total du ${selectedCalendarDay.toLocaleDateString('fr-CH')}:</span>
+                                <span class="value" style="color: #34c759;">${formatCurrency(totalToday)} CHF</span>
+                            </div>
+                        `;
+                        transactionsToday.forEach(tx => {
+                            content += `
+                                <div class="daily-revenue-item" style="font-size: 14px; color: #8e8e93;">
+                                    <span>${tx.time} - ${tx.amount} ${tx.currency} via ${tx.crypto}</span>
+                                    <span style="font-weight: 600;">${tx.cryptoAmount.toFixed(6)} ${tx.crypto}</span>
+                                </div>
+                            `;
+                        });
+                    } else {
+                        content = `<p style="text-align: center; color: #8e8e93; padding: 20px;">Aucune transaction complétée ce jour-là.</p>`;
+                    }
+                } else {
+                    // Afficher le total pour chaque jour du mois en cours
+                    const daysInMonth = new Date(currentCalendarViewDate.getFullYear(), currentCalendarViewDate.getMonth() + 1, 0).getDate();
+                    let monthHasData = false;
+                    for (let day = 1; day <= daysInMonth; day++) {
+                        const dayDate = new Date(currentCalendarViewDate.getFullYear(), currentCalendarViewDate.getMonth(), day);
+                        const dailyTotal = calculateDailyRevenue(dayDate);
+                        if (dailyTotal > 0) {
+                            monthHasData = true;
+                            content += `
+                                <div class="daily-revenue-item">
+                                    <span class="label">Revenu du ${dayDate.toLocaleDateString('fr-CH')}:</span>
+                                    <span class="value" style="color: #34c759;">${formatCurrency(dailyTotal)} CHF</span>
+                                </div>
+                            `;
+                        }
+                    }
+                    if (!monthHasData) {
+                        content = `<p style="text-align: center; color: #8e8e93; padding: 20px;">Aucune donnée de revenu pour ce mois.</p>`;
+                    }
+                }
+                dailyRevenueList.innerHTML = content;
+            }
+        // PIN Management
+        function addPin(digit) {
+            if (app.pin.length < app.settings.pinLength) {
+                app.pin += digit;
+                const currentDot = document.getElementById(`dot${app.pin.length}`);
+                if (currentDot) { // Vérifie si le point existe avant de le modifier
+                  currentDot.classList.add('filled');
+                }
+                
+                if (app.pin.length === app.settings.pinLength) {
+                    setTimeout(() => checkPin(), 300);
+                }
+            }
+        }
+
+        function deletePin() {
+            if (app.pin.length > 0) {
+              const lastDot = document.getElementById(`dot${app.pin.length}`);
+              if (lastDot) { // Vérifie si le point existe avant de le modifier
+                lastDot.classList.remove('filled');
+              };
+                app.pin = app.pin.slice(0, -1);
+            }
+        }
+
+        function checkPin() {
+            if (app.pin === app.settings.pin) {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('appContainer').style.display = 'grid';
+                currentCalendarViewDate = new Date(); // Réinitialise le calendrier au mois actuel à la connexion
+                selectedCalendarDay = null; // Désélectionne un jour précédent
+                loadContent();
+                document.getElementById('userNameDisplay').textContent = app.settings.userName; // Affiche le nom d'utilisateur stocké
+                showNotification('Connexion réussie', 'Bienvenue dans CryptoPay Pro', 'success');
+                updateRealTimePrices();
+            } else {
+              for (let i = 1; i <= app.settings.pinLength; i++) {
+                    document.getElementById(`dot${i}`).classList.remove('filled');
+                }
+                app.pin = '';
+                showNotification('Erreur', 'Code PIN incorrect', 'error');
+            }
+        }
+
+        // Mode Switching
+        function switchMode(mode) {
+            app.currentMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            app.currentView = mode === 'wallet' ? 'dashboard' : 'tpe-dashboard';
+            loadContent();
+        }
+
+        // Content Loading
+        function loadContent() {
+            loadSidebar();
+            loadMainContent();
+            updatePendingSwapsCount();
+        }
+
+        function loadSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            
+            if (app.currentMode === 'wallet') {
+                sidebar.innerHTML = `
+                    <div class="nav-section">
+                        <div class="nav-title">Navigation</div>
+                        <div class="nav-item ${app.currentView === 'dashboard' ? 'active' : ''}" onclick="navigate('dashboard')">
+                            <span class="nav-icon">📊</span>
+                            <span>Dashboard</span>
+                        </div>
+                        <div class="nav-item ${app.currentView === 'wallet' ? 'active' : ''}" onclick="navigate('wallet')">
+                            <span class="nav-icon">💰</span>
+                            <span>Portefeuille</span>
+                        </div>
+                        <div class="nav-item ${app.currentView === 'activity' ? 'active' : ''}" onclick="navigate('activity')">
+                            <span class="nav-icon">📈</span>
+                            <span>Activité</span>
+                        </div>
+                        <div class="nav-item ${app.currentView === 'staking' ? 'active' : ''}" onclick="navigate('staking')">
+                            <span class="nav-icon">💎</span>
+                            <span>Staking</span>
+                        </div>
+                        <div class="nav-item ${app.currentView === 'nft' ? 'active' : ''}" onclick="navigate('nft')">
+                            <span class="nav-icon">🎨</span>
+                            <span>NFT</span>
+                        </div>
+                        <div class="nav-item ${app.currentView === 'settings' ? 'active' : ''}" onclick="navigate('settings')">
+                            <span class="nav-icon">⚙️</span>
+                            <span>Paramètres</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                sidebar.innerHTML = `
+                    <div class="nav-section">
+                        <div class="nav-title">Mode TPE</div>
+                        <div class="nav-item ${app.currentView === 'tpe-dashboard' ? 'active' : ''}" onclick="navigate('tpe-dashboard')">
+                            <span class="nav-icon">💳</span>
+                            <span>Terminal</span>
+                        </div>
+                        <div class="nav-item ${app.currentView === 'tpe-transactions' ? 'active' : ''}" onclick="navigate('tpe-transactions')">
+                            <span class="nav-icon">📋</span>
+                            <span>Transactions</span>
+                        </div>
+                        <div class="nav-item ${app.currentView === 'tpe-swap' ? 'active' : ''}" onclick="navigate('tpe-swap')">
+                            <span class="nav-icon">🔄</span>
+                            <span>Swap Manuel</span>
+                        </div>
+                        <div class="nav-item ${app.currentView === 'pending-swaps' ? 'active' : ''}" onclick="navigate('pending-swaps')">
+                            <span class="nav-icon">⏳</span>
+                            <span>Swaps en attente</span>
+                            ${app.pendingSwaps.length > 0 ? `<span class="nav-badge">${app.pendingSwaps.length}</span>` : ''}
+                        </div>
+                        <div class="nav-item ${app.currentView === 'swaps-realized' ? 'active' : ''}" onclick="navigate('swaps-realized')">
+                            <span class="nav-icon">✅</span>
+                            <span>Swaps réalisés</span>
+                        </div>
+                        <div class="nav-item ${app.currentView === 'tpe-reports' ? 'active' : ''}" onclick="navigate('tpe-reports')">
+                            <span class="nav-icon">📊</span>
+                            <span>Rapports</span>
+                        </div>
+                        <div class="nav-item ${app.currentView === 'tpe-settings' ? 'active' : ''}" onclick="navigate('tpe-settings')">
+                            <span class="nav-icon">⚙️</span>
+                            <span>Paramètres TPE</span>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function updatePendingSwapsCount() {
+            const badge = document.querySelector('.nav-badge');
+            if (badge && app.pendingSwaps.length > 0) {
+                badge.textContent = app.pendingSwaps.length;
+            }
+        }
+
+        function loadMainContent() {
+            const mainContent = document.getElementById('mainContent');
+            
+            switch(app.currentView) {
+                case 'tpe-reports':
+                    mainContent.innerHTML = generateTPEReports();
+                    generateCalendar(currentCalendarViewDate); // Génère le calendrier pour le mois actuel
+                    updateDailyRevenueList(); // Met à jour la liste des revenus (pour le mois entier ou un jour sélectionné)
+                    break;
+                case 'dashboard':
+                    mainContent.innerHTML = generateDashboard();
+                    break;
+                case 'wallet':
+                    mainContent.innerHTML = generateWallet();
+                    break;
+                case 'activity':
+                    mainContent.innerHTML = generateActivity();
+                    break;
+                case 'settings':
+                    mainContent.innerHTML = generateSettings();
+                    break;
+                case 'tpe-dashboard':
+                    mainContent.innerHTML = generateTPEDashboard();
+                    setupTPEEventListeners();
+                    break;
+                case 'tpe-transactions':
+                    mainContent.innerHTML = generateTPETransactions();
+                    break;
+                case 'tpe-swap':
+                    mainContent.innerHTML = generateSwapInterface();
+                    setupSwapEventListeners();
+                    break;
+                case 'pending-swaps':
+                    mainContent.innerHTML = generatePendingSwaps();
+                    break;
+                case 'swaps-realized':
+                    mainContent.innerHTML = generateSwapsRealized();
+                    break;
+
+                case 'nft':
+                    mainContent.innerHTML = generateNFTGallery();
+                    break;
+                case 'staking':
+                    mainContent.innerHTML = generateStaking();
+                    break;
+            }
+        }
+
+        function navigate(view) {
+            app.currentView = view;
+            loadContent();
+        }
+
+        // Dashboard Generation
+        function generateDashboard() {
+            const totalBalance = calculateTotalBalance();
+            const recentActivities = app.activities.slice(0, 5);
+            
+            return `
+                <div class="header-stats-grid"> <div class="stat-card">
+                    <div class="stat-value">${Object.keys(app.balance).filter(key => key !== 'CHF').length}</div>
+                    <div class="stat-label">Cryptos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${app.activities.length}</div>
+                    <div class="stat-label">Transactions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" style="color: #34c759;">+12.5%</div>
+                    <div class="stat-label">24h</div>
+                </div>
+            </div>
+        </div>
+                
+                <div class="balance-card">
+                    <div class="balance-info">
+                        <div class="balance-label">Valeur Totale du Portefeuille</div>
+                        <div class="balance-amount" id="totalBalance">${formatCurrency(totalBalance)} CHF</div>
+                        <div class="balance-actions">
+                            <button class="action-btn" onclick="openSendModal()">
+                                <span>📤</span> Envoyer
+                            </button>
+                            <button class="action-btn" onclick="openReceiveModal()">
+                                <span>📥</span> Recevoir
+                            </button>
+                            <button class="action-btn" onclick="openBuyModal()">
+                                <span>💳</span> Acheter
+                            </button>
+                            <button class="action-btn" onclick="openSellModal()">
+                                <span>💰</span> Vendre
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section-title">
+                    <span>Mes Cryptomonnaies</span>
+                    <span style="font-size: 16px; color: #8e8e93;">En temps réel</span>
+                </div>
+                
+                <div class="crypto-grid" id="cryptoGrid">
+                    ${generateCryptoCards()}
+                </div>
+                
+                <div class="section-title" style="margin-top: 40px;">
+                    <span>Activité Récente</span>
+                    <a href="#" onclick="navigate('activity')" style="font-size: 16px; color: #667eea; text-decoration: none;">Voir tout →</a>
+                </div>
+                
+                <div class="activity-list">
+                    ${recentActivities.length > 0 ? recentActivities.map(activity => generateActivityItem(activity)).join('') : '<p style="text-align: center; color: #8e8e93; padding: 40px;">Aucune activité récente</p>'}
+                </div>
+            `;
+        }
+
+        // Helper Functions
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('fr-CH', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(amount);
+        }
+
+        function calculateTotalBalance() {
+            let total = app.balance.CHF;
+            for (let crypto in app.cryptoPrices) {
+                if (app.balance[crypto] && crypto !== 'CHF') {
+                    total += app.balance[crypto] * app.cryptoPrices[crypto];
+                }
+            }
+            return total;
+        }
+
+        function generateCryptoCards() {
+            const cryptos = [
+                {symbol: 'CHFM', name: 'CHF Stablecoin', color: '#ff0000'},
+                {symbol: 'BTC', name: 'Bitcoin', color: '#f7931a'},
+                {symbol: 'LIGHTNING', name: 'Lightning Network', color: '#8e44ad'},
+                {symbol: 'ETH', name: 'Ethereum', color: '#627eea'},
+                {symbol: 'USDC', name: 'USD Coin', color: '#2775ca'},
+                {symbol: 'USDT', name: 'Tether', color: '#26a17b'},
+                {symbol: 'POLYGON', name: 'Polygon', color: '#8247e5'},
+                {symbol: 'SUI', name: 'Sui Network', color: '#4da6ff'},
+                {symbol: 'ALGORAND', name: 'Algorand', color: '#000'},
+                {symbol: 'XRP', name: 'Ripple', color: '#346aa9'},
+                {symbol: 'BNB', name: 'Binance Coin', color: '#f3ba2f'},
+                {symbol: 'ADA', name: 'Cardano', color: '#0033ad'}
+            ];
+            
+            return cryptos.map(crypto => {
+                const balance = app.balance[crypto.symbol] || 0;
+                const price = app.cryptoPrices[crypto.symbol];
+                const value = balance * price;
+                const change = (Math.random() - 0.5) * 10;
+                const changeClass = change > 0 ? 'positive' : 'negative';
+                
+                return `
+                    <div class="crypto-card" onclick="openCryptoDetails('${crypto.symbol}')">
+                        <div class="crypto-header">
+                            <div class="crypto-icon" style="background: ${crypto.color}">
+                                ${crypto.symbol === 'LIGHTNING' ? '⚡' : crypto.symbol.charAt(0)}
+                            </div>
+                            <div class="crypto-info">
+                                <div class="crypto-name">${crypto.name}</div>
+                                <div class="crypto-symbol">${crypto.symbol}</div>
+                            </div>
+                        </div>
+                        <div class="crypto-stats">
+                            <div>
+                                <div class="crypto-balance">${balance.toFixed(4)}</div>
+                                <div class="crypto-value">${formatCurrency(value)} CHF</div>
+                            </div>
+                            <div class="crypto-change">
+                                <div class="change-percent ${changeClass}">${change > 0 ? '+' : ''}${change.toFixed(2)}%</div>
+                                <div class="crypto-value">${formatCurrency(price)} CHF</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Wallet Content
+        function generateWallet() {
+            return `
+                <div class="dashboard-header">
+                    <h1 class="page-title">Portefeuille</h1>
+                </div>
+                
+                <div class="crypto-grid">
+                    ${generateDetailedCryptoCards()}
+                </div>
+            `;
+        }
+
+        function generateDetailedCryptoCards() {
+            const allCryptos = Object.keys(app.balance).filter(key => key !== 'CHF');
+            
+            return allCryptos.map(symbol => {
+                const balance = app.balance[symbol];
+                const price = app.cryptoPrices[symbol] || 1;
+                const value = balance * price;
+                const change = (Math.random() - 0.5) * 10;
+                const changeClass = change > 0 ? 'positive' : 'negative';
+                
+                const cryptoColors = {
+                    CHFM: '#ff0000',
+                    BTC: '#f7931a',
+                    LIGHTNING: '#8e44ad',
+                    ETH: '#627eea',
+                    USDC: '#2775ca',
+                    USDT: '#26a17b',
+                    POLYGON: '#8247e5',
+                    SUI: '#4da6ff',
+                    ALGORAND: '#000',
+                    XRP: '#346aa9',
+                    BNB: '#f3ba2f',
+                    ADA: '#0033ad',
+                    DOT: '#e6007a',
+                    MATIC: '#8247e5'
+                };
+                
+                return `
+                    <div class="crypto-card" onclick="openCryptoDetails('${symbol}')">
+                        <div class="crypto-header">
+                            <div class="crypto-icon" style="background: ${cryptoColors[symbol] || '#667eea'}">
+                                ${symbol === 'LIGHTNING' ? '⚡' : symbol.charAt(0)}
+                            </div>
+                            <div class="crypto-info">
+                                <div class="crypto-name">${symbol}</div>
+                                <div class="crypto-symbol">${balance.toFixed(4)} ${symbol}</div>
+                            </div>
+                        </div>
+                        <div class="crypto-stats">
+                            <div>
+                                <div class="crypto-balance">${formatCurrency(value)}</div>
+                                <div class="crypto-value">CHF</div>
+                            </div>
+                            <div class="crypto-change">
+                                <div class="change-percent ${changeClass}">${change > 0 ? '+' : ''}${change.toFixed(2)}%</div>
+                                <div class="crypto-value">@ ${formatCurrency(price)}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Activity Generation
+        function generateActivity() {
+            return `
+                <div class="dashboard-header">
+                    <h1 class="page-title">Historique des Activités</h1>
+                </div>
+                
+                <div class="activity-list">
+                    ${app.activities.map(activity => `<div onclick="showActivityDetails('${activity.id}')">${generateActivityItem(activity)}</div>`).join('')}
+                    ${app.activities.length === 0 ? '<p style="text-align: center; color: #8e8e93; padding: 40px;">Aucune activité</p>' : ''}
+                </div>
+            `;
+        }
+
+        function generateActivityItem(activity) {
+            return `
+                <div class="activity-item">
+                    <div class="activity-icon ${activity.type}">
+                        ${activity.type === 'received' ? '📥' : 
+                          activity.type === 'sent' ? '📤' : 
+                          activity.type === 'swap' ? '🔄' :
+                          activity.type === 'buy' ? '💳' : 
+                          activity.type === 'sell' ? '💰' : '✅'}
+                    </div>
+                    <div class="activity-details">
+                        <div class="activity-title">${activity.title}</div>
+                        <div class="activity-subtitle">${activity.subtitle}</div>
+                    </div>
+                    <div class="activity-amount">
+                        <div class="activity-crypto">${activity.amount}</div>
+                        <div class="activity-value">${activity.value || ''}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // TPE Dashboard
+        function generateTPEDashboard() {
+            return `
+                <div class="dashboard-header">
+                    <h1 class="page-title">Terminal de Paiement</h1>
+                </div>
+                
+                <div class="tpe-dashboard">
+                    <div class="invoice-section">
+                        <h2 style="margin-bottom: 20px;">Créer une facture</h2>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Montant</label>
+                            <input type="number" id="invoiceAmount" class="input-field" placeholder="0.00" style="font-size: 32px; text-align: center;">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Devise de facturation</label>
+                            <div class="currency-tabs">
+                                <div class="currency-tab ${app.selectedCurrency === 'CHF' ? 'active' : ''}" onclick="selectCurrency('CHF')">CHF</div>
+                                <div class="currency-tab ${app.selectedCurrency === 'EUR' ? 'active' : ''}" onclick="selectCurrency('EUR')">EUR</div>
+                                <div class="currency-tab ${app.selectedCurrency === 'USD' ? 'active' : ''}" onclick="selectCurrency('USD')">USD</div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Méthode de paiement crypto acceptée</label>
+                            <div class="crypto-selector">
+                                <div class="crypto-option ${app.selectedCrypto === 'BTC' ? 'active' : ''}" onclick="selectPaymentCrypto('BTC')">BTC</div>
+                                <div class="crypto-option ${app.selectedCrypto === 'LIGHTNING' ? 'active' : ''}" onclick="selectPaymentCrypto('LIGHTNING')">Lightning</div>
+                                <div class="crypto-option ${app.selectedCrypto === 'POLYGON' ? 'active' : ''}" onclick="selectPaymentCrypto('POLYGON')">Polygon</div>
+                                <div class="crypto-option ${app.selectedCrypto === 'SUI' ? 'active' : ''}" onclick="selectPaymentCrypto('SUI')">Sui</div>
+                                <div class="crypto-option ${app.selectedCrypto === 'ALGORAND' ? 'active' : ''}" onclick="selectPaymentCrypto('ALGORAND')">Algorand</div>
+                                <div class="crypto-option ${app.selectedCrypto === 'XRP' ? 'active' : ''}" onclick="selectPaymentCrypto('XRP')">XRP</div>
+                                <div class="crypto-option ${app.selectedCrypto === 'USDC' ? 'active' : ''}" onclick="selectPaymentCrypto('USDC')">USDC</div>
+                                <div class="crypto-option ${app.selectedCrypto === 'USDT' ? 'active' : ''}" onclick="selectPaymentCrypto('USDT')">USDT</div>
+                                <div class="crypto-option ${app.selectedCrypto === 'CHFM' ? 'active' : ''}" onclick="selectPaymentCrypto('CHFM')">CHFM</div>
+                            </div>
+                        </div>
+                        
+                        <div class="conversion-settings">
+                            <div class="setting-item">
+                                <span>Conversion automatique en CHFM</span>
+                                <div class="toggle-switch ${app.autoConvert ? 'active' : ''}" onclick="toggleAutoConvert()"></div>
+                            </div>
+                            
+                            ${app.autoConvert ? `
+                                <div style="margin-top: 20px;">
+                                    <label class="form-label">Moment de conversion</label>
+                                    <div class="conversion-option ${app.convertTiming === 'immediate' ? 'active' : ''}" onclick="setConvertTiming('immediate')">
+                                        <div class="conversion-radio"></div>
+                                        <div>
+                                            <div style="font-weight: 600;">Immédiat</div>
+                                            <div style="font-size: 14px; color: #8e8e93;">Convertir dès réception du paiement</div>
+                                        </div>
+                                    </div>
+                                    <div class="conversion-option ${app.convertTiming === 'endOfDay' ? 'active' : ''}" onclick="setConvertTiming('endOfDay')">
+                                        <div class="conversion-radio"></div>
+                                        <div>
+                                            <div style="font-weight: 600;">Fin de journée</div>
+                                            <div style="font-size: 14px; color: #8e8e93;">Convertir automatiquement à 23:59</div>
+                                        </div>
+                                    </div>
+                                    <div class="conversion-option ${app.convertTiming === 'never' ? 'active' : ''}" onclick="setConvertTiming('never')">
+                                        <div class="conversion-radio"></div>
+                                        <div>
+                                            <div style="font-weight: 600;">Manuel</div>
+                                            <div style="font-size: 14px; color: #8e8e93;">Je convertirai manuellement</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                        
+                        <button class="submit-btn" onclick="generateInvoice()">Générer QR Code de paiement</button>
+                    </div>
+                    
+                    <div class="invoice-section">
+                        <h2 style="margin-bottom: 20px;">Aperçu de la facture</h2>
+                        <div id="invoicePreview">
+                            <div style="text-align: center; padding: 60px; color: #8e8e93;">
+                                <div style="font-size: 48px; margin-bottom: 20px;">💳</div>
+                                <p>Entrez un montant pour générer une facture de paiement</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function setupTPEEventListeners() {
+            // Les event listeners sont déjà configurés via les attributs onclick dans le HTML
+        }
+
+        // Modal Functions
+        function openModal(title, content) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalContent').innerHTML = content;
+            document.getElementById('modalOverlay').style.display = 'block';
+        }
+
+        function closeModal(event) {
+            if (!event || event.target.id === 'modalOverlay') {
+                document.getElementById('modalOverlay').style.display = 'none';
+            }
+        }
+
+        function openSendModal() {
+            const content = `
+                <div class="form-group">
+                    <label class="form-label">Crypto à envoyer</label>
+                    <select class="input-field" id="sendCrypto">
+                        ${Object.keys(app.balance).filter(c => c !== 'CHF' && app.balance[c] > 0).map(crypto => 
+                            `<option value="${crypto}">${crypto} - ${app.balance[crypto].toFixed(6)}</option>`
+                        ).join('')}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Adresse du destinataire</label>
+                    <input type="text" class="input-field" id="sendAddress" placeholder="Adresse du portefeuille de destination" value="bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Montant</label>
+                    <input type="number" class="input-field" id="sendAmount" placeholder="0.000000" step="0.000001">
+                </div>
+                
+                <button class="submit-btn" onclick="sendCrypto()">Envoyer la transaction</button>
+            `;
+            openModal('Envoyer des cryptos', content);
+        }
+
+        function openReceiveModal() {
+            const addresses = {
+                BTC: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
+                ETH: '0x742d35Cc6634C0532925a3b844Bc9e7595f7357e',
+                LIGHTNING: 'lnbc1u1p3xnxyz...example',
+                POLYGON: '0x742d35Cc6634C0532925a3b844Bc9e7595f7357e',
+                SUI: '0x742d35Cc6634C0532925a3b844Bc9e7595f7357e',
+                ALGORAND: 'ALGO7Y6Z3XDFSCKXN4FGLTIVJF5F6EXAMPLE',
+                XRP: 'rXRPAddress1234567890',
+                USDC: '0x742d35Cc6634C0532925a3b844Bc9e7595f7357e',
+                USDT: '0x742d35Cc6634C0532925a3b844Bc9e7595f7357e',
+                CHFM: '0x742d35Cc6634C0532925a3b844Bc9e7595f7357e'
+            };
+            
+            const content = `
+                <div class="form-group">
+                    <label class="form-label">Sélectionner une crypto</label>
+                    <select class="input-field" id="receiveCrypto" onchange="updateReceiveAddress()">
+                        <option value="BTC">Bitcoin (BTC)</option>
+                        <option value="LIGHTNING">Lightning Network (LIGHTNING)</option>
+                        <option value="ETH">Ethereum (ETH)</option>
+                        <option value="POLYGON">Polygon (POLYGON)</option>
+                        <option value="SUI">Sui Network (SUI)</option>
+                        <option value="ALGORAND">Algorand (ALGORAND)</option>
+                        <option value="XRP">Ripple (XRP)</option>
+                        <option value="USDC">USD Coin (USDC)</option>
+                        <option value="USDT">Tether (USDT)</option>
+                        <option value="CHFM">CHF Stablecoin (CHFM)</option>
+                    </select>
+                </div>
+                
+                <div class="qr-container" style="background: #1c1c1e;">
+                    <div class="qr-code">Code QR</div>
+                    <p style="color: #fff; word-break: break-all; font-size: 14px;" id="receiveAddress">${addresses.BTC}</p>
+                    <button class="action-btn" style="margin-top: 20px;" onclick="copyAddress()">📋 Copier l'adresse</button>
+                </div>
+                
+                <div style="margin-top: 20px; text-align: center;">
+                    <button class="action-btn" onclick="simulateReceive()">🎯 Simuler une réception</button>
+                </div>
+            `;
+            openModal('Recevoir des cryptos', content);
+        }
+
+            function openBuyModal() {
+            // Ferme la modale actuelle (vide) si elle est ouverte, pour éviter les superpositions
+            closeModal();
+
+            // Appelle la fonction de Mt Pelerin pour ouvrir leur modal d'achat
+            // J'ai mis la langue en français (fr) et un mode 'buy' pour l'exemple.
+            // Tu peux ajouter d'autres options si la documentation de Mt Pelerin les mentionne.
+            if (typeof showMtpModal === 'function') { // Vérifie si la fonction Mt Pelerin est chargée
+                showMtpModal({
+                    lang: 'fr', // Langue : français
+                    theme: 'dark', // Thème sombre pour correspondre à ton app
+                    type: 'buy' // Indique que c'est pour l'achat
+                    // Tu pourrais ajouter ici des pré-sélections de crypto ou de montant si Mt Pelerin le permet
+                    // par exemple: defaultFiat: 'CHF', defaultCrypto: 'BTC', defaultAmount: 100
+                });
+            } else {
+                showNotification('Erreur', 'Le service Mt Pelerin n\'est pas encore chargé. Veuillez réessayer.', 'error');
+            }
+        }
+
+            function openSellModal() {
+            // Ferme la modale actuelle (vide) si elle est ouverte, pour éviter les superpositions
+            closeModal();
+
+            // Appelle la fonction de Mt Pelerin pour ouvrir leur modal de vente
+            if (typeof showMtpModal === 'function') { // Vérifie si la fonction Mt Pelerin est chargée
+                showMtpModal({
+                    lang: 'fr', // Langue : français
+                    theme: 'dark', // Thème sombre
+                    type: 'sell' // Indique que c'est pour la vente
+                    // Tu peux ajouter des pré-sélections ici si Mt Pelerin le permet
+                });
+            } else {
+                showNotification('Erreur', 'Le service Mt Pelerin n\'est pas encore chargé. Veuillez réessayer.', 'error');
+            }
+        }
+
+        // Transaction Functions avec mise à jour du solde
+        function sendCrypto() {
+            const crypto = document.getElementById('sendCrypto').value;
+            const address = document.getElementById('sendAddress').value;
+            const amount = parseFloat(document.getElementById('sendAmount').value);
+            
+            if (!amount || amount <= 0) {
+                showNotification('Erreur', 'Veuillez entrer un montant valide', 'error');
+                return;
+            }
+            
+            if (amount > app.balance[crypto]) {
+                showNotification('Erreur', 'Solde insuffisant', 'error');
+                return;
+            }
+            
+            // Update balance
+            app.balance[crypto] -= amount;
+            
+            // Add activity
+            const value = amount * app.cryptoPrices[crypto];
+            addActivity({
+                type: 'sent',
+                title: `Envoi de ${crypto}`,
+                subtitle: `Vers ${address.substring(0, 10)}...${address.substring(address.length - 4)}`,
+                amount: `-${amount.toFixed(6)} ${crypto}`,
+                value: `-${formatCurrency(value)} CHF`
+            });
+            
+            closeModal();
+            showNotification('Succès', `${amount.toFixed(6)} ${crypto} envoyé avec succès!`, 'success');
+            
+            // Refresh content
+            updateTotalBalance();
+            loadMainContent();
+        }
+
+        function simulateReceive() {
+            const crypto = document.getElementById('receiveCrypto').value;
+            const amount = parseFloat((Math.random() * 0.1 + 0.01).toFixed(6));
+            
+            // Update balance
+            app.balance[crypto] = (app.balance[crypto] || 0) + amount;
+            
+            // Add activity
+            const value = amount * app.cryptoPrices[crypto];
+            addActivity({
+                type: 'received',
+                title: `Réception de ${crypto}`,
+                subtitle: `De 0x7a8b...3c4d`,
+                amount: `+${amount.toFixed(6)} ${crypto}`,
+                value: `+${formatCurrency(value)} CHF`
+            });
+            
+            closeModal();
+            showNotification('Succès', `${amount.toFixed(6)} ${crypto} reçu!`, 'success');
+            
+            // Refresh content
+            updateTotalBalance();
+            loadMainContent();
+        }
+
+
+
+        function updateReceiveAddress() {
+            const addresses = {
+                BTC: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
+                ETH: '0x742d35Cc6634C0532925a3b844Bc9e7595f7357e',
+                LIGHTNING: 'lnbc1u1p3xnxyz...example',
+                POLYGON: '0x742d35Cc6634C0532925a3b844Bc9e7595f7357e',
+                SUI: '0x742d35Cc6634C0532925a3b844Bc9e7595f7357e',
+                ALGORAND: 'ALGO7Y6Z3XDFSCKXN4FGLTIVJF5F6EXAMPLE',
+                XRP: 'rXRPAddress1234567890',
+                USDC: '0x742d35Cc6634C0532925a3b844Bc9e7595f7357e',
+                USDT: '0x742d35Cc6634C0532925a3b844Bc9e7595f7357e',
+                CHFM: '0x742d35Cc6634C0532925a3b844Bc9e7595f7357e'
+            };
+            const crypto = document.getElementById('receiveCrypto').value;
+            document.getElementById('receiveAddress').textContent = addresses[crypto];
+        }
+
+        function copyAddress() {
+            const address = document.getElementById('receiveAddress').textContent;
+            navigator.clipboard.writeText(address);
+            showNotification('Succès', 'Adresse copiée dans le presse-papiers!', 'success');
+        }
+
+        // TPE Functions
+        function selectCurrency(currency) {
+            app.selectedCurrency = currency;
+            document.querySelectorAll('.currency-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        function selectPaymentCrypto(crypto) {
+            app.selectedCrypto = crypto;
+            document.querySelectorAll('.crypto-option').forEach(option => {
+                option.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        function toggleAutoConvert() {
+            app.autoConvert = !app.autoConvert;
+            event.currentTarget.classList.toggle('active');
+            loadMainContent(); // Refresh to show/hide conversion options
+        }
+
+        function setConvertTiming(timing) {
+            app.convertTiming = timing;
+            document.querySelectorAll('.conversion-option').forEach(option => {
+                option.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+        }
+
+        function generateInvoice() {
+            const amount = parseFloat(document.getElementById('invoiceAmount').value);
+            
+            if (!amount || amount <= 0) {
+                showNotification('Erreur', 'Veuillez entrer un montant valide', 'error');
+                return;
+            }
+            
+            const cryptoAmount = amount / app.cryptoPrices[app.selectedCrypto];
+            
+            document.getElementById('invoicePreview').innerHTML = `
+                <div class="qr-container">
+                    <h3 style="color: #000; margin-bottom: 20px;">Facture générée</h3>
+                    <div class="qr-code">QR Code de paiement</div>
+                    <div style="color: #000; font-size: 24px; font-weight: 700; margin-top: 15px;">
+                        ${amount} ${app.selectedCurrency}
+                    </div>
+                    <p style="color: #666; margin-top: 10px;">≈ ${cryptoAmount.toFixed(6)} ${app.selectedCrypto}</p>
+                    <p style="color: #666; font-size: 14px; margin-top: 20px;">⏳ En attente du paiement...</p>
+                </div>
+            `;
+            
+            // Simulate payment received after 5 seconds
+            setTimeout(() => {
+                simulateTPEPayment(amount, cryptoAmount);
+            }, 5000);
+        }
+
+        function simulateTPEPayment(amount, cryptoAmount) {
+            // Add crypto to balance
+            app.balance[app.selectedCrypto] = (app.balance[app.selectedCrypto] || 0) + cryptoAmount;
+            
+            // Add TPE transaction
+            const transaction = {
+                id: `TPE${Date.now()}`,
+                amount: amount,
+                currency: app.selectedCurrency,
+                crypto: app.selectedCrypto,
+                cryptoAmount: cryptoAmount,
+                time: new Date().toLocaleTimeString(),
+                status: 'completed',
+                date: new Date()
+            };
+            app.tpeTransactions.unshift(transaction);
+            
+            // Add payment activity
+            addActivity({
+                type: 'received',
+                title: 'Paiement TPE reçu',
+                subtitle: `Client via ${app.selectedCrypto}`,
+                amount: `+${cryptoAmount.toFixed(6)} ${app.selectedCrypto}`,
+                value: `${formatCurrency(amount)} ${app.selectedCurrency}`
+            });
+            
+            // Handle auto conversion
+            if (app.autoConvert && app.convertTiming === 'immediate') {
+                // Convert immediately
+                const chfmAmount = cryptoAmount * app.cryptoPrices[app.selectedCrypto];
+                app.balance[app.selectedCrypto] -= cryptoAmount;
+                app.balance.CHFM = (app.balance.CHFM || 0) + chfmAmount;
+                
+                addActivity({
+                    type: 'swap',
+                    title: 'Conversion automatique immédiate',
+                    subtitle: `${app.selectedCrypto} → CHFM`,
+                    amount: `${cryptoAmount.toFixed(6)} ${app.selectedCrypto}`,
+                    value: `${formatCurrency(chfmAmount)} CHFM`
+                });
+                
+                // Add to swaps realized
+                app.swapsRealized.unshift({
+                    id: Date.now(),
+                    fromCrypto: app.selectedCrypto,
+                    toCrypto: 'CHFM',
+                    fromAmount: cryptoAmount,
+                    toAmount: chfmAmount,
+                    date: new Date(),
+                    type: 'automatic-immediate'
+                });
+                
+                showNotification('Paiement reçu et converti!', `${amount} ${app.selectedCurrency} → ${formatCurrency(chfmAmount)} CHFM`, 'success');
+            } else if (app.autoConvert && app.convertTiming === 'endOfDay') {
+                // Add to pending swaps
+                app.pendingSwaps.push({
+                    id: Date.now(),
+                    crypto: app.selectedCrypto,
+                    amount: cryptoAmount,
+                    targetCrypto: 'CHFM',
+                    value: amount,
+                    currency: app.selectedCurrency,
+                    date: new Date(),
+                    scheduledFor: 'End of day'
+                });
+                updatePendingSwapsCount();
+                showNotification('Paiement reçu!', `${amount} ${app.selectedCurrency} - Conversion prévue en fin de journée`, 'success');
+            } else {
+                showNotification('Paiement reçu!', `${amount} ${app.selectedCurrency} (${cryptoAmount.toFixed(6)} ${app.selectedCrypto})`, 'success');
+            }
+            
+            // Update preview
+            document.getElementById('invoicePreview').innerHTML = `
+                <div style="text-align: center; padding: 60px;">
+                    <div style="font-size: 72px; margin-bottom: 20px; color: #34c759;">✅</div>
+                    <h3 style="color: #34c759;">Paiement reçu avec succès!</h3>
+                    <p style="color: #8e8e93; margin-top: 10px;">${amount} ${app.selectedCurrency}</p>
+                    ${app.autoConvert && app.convertTiming === 'immediate' ? '<p style="color: #667eea; margin-top: 10px;">Converti automatiquement en CHFM</p>' : ''}
+                    ${app.autoConvert && app.convertTiming === 'endOfDay' ? '<p style="color: #ff9500; margin-top: 10px;">Conversion prévue en fin de journée</p>' : ''}
+                </div>
+            `;
+            
+            // Reset form
+            document.getElementById('invoiceAmount').value = '';
+            
+            // Reset preview after 3 seconds
+            setTimeout(() => {
+                document.getElementById('invoicePreview').innerHTML = `
+                    <div style="text-align: center; padding: 60px; color: #8e8e93;">
+                        <div style="font-size: 48px; margin-bottom: 20px;">💳</div>
+                        <p>Entrez un montant pour générer une facture de paiement</p>
+                    </div>
+                `;
+            }, 3000);
+            
+            // Update balance display
+            updateTotalBalance();
+        }
+
+        // TPE Transactions
+        function generateTPETransactions() {
+            return `
+                <div class="dashboard-header">
+                    <h1 class="page-title">Transactions TPE</h1>
+                </div>
+                
+                <div class="activity-list">
+                    ${app.tpeTransactions.length === 0 ?
+                        '<p style="text-align: center; color: #8e8e93; padding: 40px;">Aucune transaction TPE</p>' :
+                        app.tpeTransactions.map(tx => `
+                            <div class="activity-item" onclick="showTPETransactionDetails('${tx.id}')">
+                                <div class="activity-icon ${tx.status === 'completed' ? 'received' : 'swap'}">
+                                    ${tx.status === 'completed' ? '✓' : '⏳'}
+                                </div>
+                                <div class="activity-details">
+                                    <div class="activity-title">Transaction ${tx.id}</div>
+                                    <div class="activity-subtitle">${tx.time} - Payé en ${tx.crypto}</div>
+                                </div>
+                                <div class="activity-amount">
+                                    <div class="activity-crypto">${tx.amount} ${tx.currency}</div>
+                                    <div class="activity-value" style="color: ${tx.status === 'completed' ? '#34c759' : '#ff9500'}">
+                                        ${tx.status === 'completed' ? 'Complété' : 'En attente'}
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')
+                    }
+                </div>
+            `;
+        }
+
+        // Swap Interface
+        function generateSwapInterface() {
+            return `
+                <div class="dashboard-header">
+                    <h1 class="page-title">Swap Manuel</h1>
+                </div>
+                
+                <div style="max-width: 600px; margin: 0 auto;">
+                    <div class="invoice-section">
+                        <div class="form-group">
+                            <label class="form-label">De</label>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="number" class="input-field" id="swapFromAmount" placeholder="0.000000" oninput="calculateSwap()" style="flex: 1;">
+                                <select class="input-field" id="swapFromCrypto" onchange="calculateSwap()" style="width: 150px;">
+                                    ${Object.keys(app.balance).filter(c => app.balance[c] > 0).map(crypto => 
+                                        `<option value="${crypto}">${crypto}</option>`
+                                    ).join('')}
+                                </select>
+                            </div>
+                            <small style="color: #8e8e93; margin-top: 5px; display: block;" id="swapFromBalance"></small>
+                        </div>
+                        
+                        <div style="text-align: center; margin: 20px 0;">
+                            <div style="font-size: 32px; color: #667eea;">⬇️</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Vers</label>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="number" class="input-field" id="swapToAmount" placeholder="0.000000" readonly style="flex: 1;">
+                                <select class="input-field" id="swapToCrypto" onchange="calculateSwap()" style="width: 150px;">
+                                    ${Object.keys(app.cryptoPrices).map(crypto => 
+                                        `<option value="${crypto}" ${crypto === 'CHFM' ? 'selected' : ''}>${crypto}</option>`
+                                    ).join('')}
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <button class="submit-btn" onclick="executeSwap()">Échanger maintenant</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function setupSwapEventListeners() {
+            calculateSwap(); // Initial calculation
+        }
+
+        function calculateSwap() {
+            const fromCrypto = document.getElementById('swapFromCrypto').value;
+            const toCrypto = document.getElementById('swapToCrypto').value;
+            const fromAmount = parseFloat(document.getElementById('swapFromAmount').value) || 0;
+            
+            // Update balance display
+            document.getElementById('swapFromBalance').textContent = `Solde: ${app.balance[fromCrypto]?.toFixed(6) || '0'} ${fromCrypto}`;
+            
+            if (fromAmount > 0) {
+                const fromValue = fromAmount * (app.cryptoPrices[fromCrypto] || 1);
+                const toAmount = fromValue / (app.cryptoPrices[toCrypto] || 1);
+                document.getElementById('swapToAmount').value = toAmount.toFixed(6);
+            } else {
+                document.getElementById('swapToAmount').value = '';
+            }
+        }
+
+        function executeSwap() {
+            const fromCrypto = document.getElementById('swapFromCrypto').value;
+            const toCrypto = document.getElementById('swapToCrypto').value;
+            const fromAmount = parseFloat(document.getElementById('swapFromAmount').value);
+            const toAmount = parseFloat(document.getElementById('swapToAmount').value);
+            
+            if (!fromAmount || fromAmount <= 0) {
+                showNotification('Erreur', 'Veuillez entrer un montant valide', 'error');
+                return;
+            }
+            
+            if (fromCrypto === 'CHF' && fromAmount > app.balance.CHF) {
+                showNotification('Erreur', 'Solde CHF insuffisant', 'error');
+                return;
+            } else if (fromCrypto !== 'CHF' && fromAmount > app.balance[fromCrypto]) {
+                showNotification('Erreur', `Solde ${fromCrypto} insuffisant`, 'error');
+                return;
+            }
+            
+            // Update balances
+            if (fromCrypto === 'CHF') {
+                app.balance.CHF -= fromAmount;
+            } else {
+                app.balance[fromCrypto] -= fromAmount;
+            }
+            
+            if (toCrypto === 'CHF') {
+                app.balance.CHF += toAmount;
+            } else {
+                app.balance[toCrypto] = (app.balance[toCrypto] || 0) + toAmount;
+            }
+            
+            // Add activity
+            addActivity({
+                type: 'swap',
+                title: 'Échange manuel effectué',
+                subtitle: `${fromCrypto} → ${toCrypto}`,
+                amount: `${fromAmount.toFixed(6)} ${fromCrypto}`,
+                value: `${toAmount.toFixed(6)} ${toCrypto}`
+            });
+            
+            // Add to swaps realized
+            app.swapsRealized.unshift({
+                id: Date.now(),
+                fromCrypto: fromCrypto,
+                toCrypto: toCrypto,
+                fromAmount: fromAmount,
+                toAmount: toAmount,
+                date: new Date(),
+                type: 'manual'
+            });
+            
+            showNotification('Succès', `Échange de ${fromAmount.toFixed(6)} ${fromCrypto} vers ${toAmount.toFixed(6)} ${toCrypto} effectué!`, 'success');
+            
+            // Reset form
+            document.getElementById('swapFromAmount').value = '';
+            document.getElementById('swapToAmount').value = '';
+            
+            // Refresh
+            updateTotalBalance();
+            loadMainContent();
+        }
+
+        // Pending Swaps
+        function generatePendingSwaps() {
+            return `
+                <div class="dashboard-header">
+                    <h1 class="page-title">Swaps en attente</h1>
+                </div>
+                
+                <div class="pending-swaps">
+                    ${app.pendingSwaps.length === 0 ? 
+                        '<p style="text-align: center; color: #8e8e93; padding: 40px;">Aucun swap en attente</p>' :
+                        app.pendingSwaps.map((swap, index) => `
+                            <div class="pending-swap-item">
+                                <div class="swap-info">
+                                    <div class="swap-amount">${swap.amount.toFixed(6)} ${swap.crypto}</div>
+                                    <div class="swap-time">Reçu le ${swap.date.toLocaleString()} - ${swap.value} ${swap.currency}</div>
+                                    <div style="font-size: 12px; color: #ff9500;">Planifié: ${swap.scheduledFor}</div>
+                                </div>
+                                <button class="swap-action-btn" onclick="executePendingSwap(${index})">Convertir maintenant</button>
+                            </div>
+                        `).join('')
+                    }
+                </div>
+                
+                ${app.pendingSwaps.length > 0 ? `
+                    <div style="text-align: center; margin-top: 30px;">
+                        <button class="submit-btn" onclick="executeAllPendingSwaps()">Convertir tout en CHFM</button>
+                    </div>
+                ` : ''}
+            `;
+        }
+
+        function executePendingSwap(index) {
+            const swap = app.pendingSwaps[index];
+            const chfmAmount = swap.amount * app.cryptoPrices[swap.crypto];
+            
+            // Update balances
+            app.balance[swap.crypto] -= swap.amount;
+            app.balance.CHFM = (app.balance.CHFM || 0) + chfmAmount;
+            
+            // Add activity
+            addActivity({
+                type: 'swap',
+                title: 'Conversion manuelle en CHFM',
+                subtitle: `${swap.crypto} → CHFM`,
+                amount: `${swap.amount.toFixed(6)} ${swap.crypto}`,
+                value: `${formatCurrency(chfmAmount)} CHFM`
+            });
+            
+            // Add to swaps realized
+            app.swapsRealized.unshift({
+                id: Date.now(),
+                fromCrypto: swap.crypto,
+                toCrypto: 'CHFM',
+                fromAmount: swap.amount,
+                toAmount: chfmAmount,
+                date: new Date(),
+                type: 'manual-from-pending'
+            });
+            
+            // Remove from pending
+            app.pendingSwaps.splice(index, 1);
+            
+            showNotification('Succès', `${swap.amount.toFixed(6)} ${swap.crypto} converti en CHFM!`, 'success');
+            
+            // Refresh
+            updateTotalBalance();
+            loadContent();
+        }
+
+        function executeAllPendingSwaps() {
+            let totalCHFM = 0;
+            
+            app.pendingSwaps.forEach(swap => {
+                const chfmAmount = swap.amount * app.cryptoPrices[swap.crypto];
+                app.balance[swap.crypto] -= swap.amount;
+                totalCHFM += chfmAmount;
+                
+                addActivity({
+                    type: 'swap',
+                    title: 'Conversion groupée en CHFM',
+                    subtitle: `${swap.crypto} → CHFM`,
+                    amount: `${swap.amount.toFixed(6)} ${swap.crypto}`,
+                    value: `${formatCurrency(chfmAmount)} CHFM`
+                });
+                
+                // Add to swaps realized
+                app.swapsRealized.unshift({
+                    id: Date.now(),
+                    fromCrypto: swap.crypto,
+                    toCrypto: 'CHFM',
+                    fromAmount: swap.amount,
+                    toAmount: chfmAmount,
+                    date: new Date(),
+                    type: 'batch-conversion'
+                });
+            });
+            
+            app.balance.CHFM = (app.balance.CHFM || 0) + totalCHFM;
+            app.pendingSwaps = [];
+            
+            showNotification('Succès', `${formatCurrency(totalCHFM)} CHFM ajoutés à votre solde!`, 'success');
+            
+            // Refresh
+            updateTotalBalance();
+            loadContent();
+        }
+
+        // Swaps Realized
+        function generateSwapsRealized() {
+            return `
+                <div class="dashboard-header">
+                    <h1 class="page-title">Swaps réalisés</h1>
+                </div>
+                
+                <div class="activity-list">
+                    ${app.swapsRealized.length === 0 ?
+                        '<p style="text-align: center; color: #8e8e93; padding: 40px;">Aucun swap réalisé</p>' :
+                        app.swapsRealized.map(swap => `
+                            <div class="activity-item">
+                                <div class="activity-icon swap">🔄</div>
+                                <div class="activity-details">
+                                    <div class="activity-title">${swap.fromCrypto} → ${swap.toCrypto}</div>
+                                    <div class="activity-subtitle">
+                                        ${swap.date.toLocaleString()} - 
+                                        ${swap.type === 'automatic-immediate' ? 'Auto immédiat' :
+                                          swap.type === 'manual' ? 'Manuel' :
+                                          swap.type === 'manual-from-pending' ? 'Manuel (en attente)' :
+                                          swap.type === 'batch-conversion' ? 'Conversion groupée' : 'Conversion'}
+                                    </div>
+                                </div>
+                                <div class="activity-amount">
+                                    <div class="activity-crypto">${swap.fromAmount.toFixed(6)} ${swap.fromCrypto}</div>
+                                    <div class="activity-value">→ ${swap.toAmount.toFixed(6)} ${swap.toCrypto}</div>
+                                </div>
+                            </div>
+                        `).join('')
+                    }
+                </div>
+            `;
+        }
+
+        // Reports
+        function generateTPEReports() {
+
+
+            const todayRevenue = app.tpeTransactions
+                .filter(tx => tx.status === 'completed' && isToday(tx.date))
+                .reduce((sum, tx) => sum + tx.amount, 0);
+            const weekRevenue = todayRevenue * 7; // Simulation
+            const monthRevenue = todayRevenue * 30; // Simulation
+            
+            return `
+                <div class="dashboard-header">
+                    <h1 class="page-title">Rapports TPE</h1>
+                </div>
+                
+                <div class="crypto-grid">
+                    <div class="crypto-card" style="text-align: center;">
+                        <div style="font-size: 48px; margin-bottom: 10px;">📅</div>
+                        <div style="font-size: 32px; font-weight: 700; margin-bottom: 10px;">${formatCurrency(todayRevenue)}</div>
+                        <div style="color: #8e8e93;">Aujourd'hui</div>
+                        <div style="color: #34c759; margin-top: 10px;">+12.5% vs hier</div>
+                    </div>
+                    
+                    <div class="crypto-card" style="text-align: center;">
+                        <div style="font-size: 48px; margin-bottom: 10px;">📊</div>
+                        <div style="font-size: 32px; font-weight: 700; margin-bottom: 10px;">${formatCurrency(weekRevenue)}</div>
+                        <div style="color: #8e8e93;">Cette semaine</div>
+                        <div style="color: #34c759; margin-top: 10px;">+8.3% vs semaine dernière</div>
+                    </div>
+                    
+                    <div class="crypto-card" style="text-align: center;">
+                        <div style="font-size: 48px; margin-bottom: 10px;">📈</div>
+                        <div style="font-size: 32px; font-weight: 700; margin-bottom: 10px;">${formatCurrency(monthRevenue)}</div>
+                        <div style="color: #8e8e93;">Ce mois</div>
+                        <div style="color: #ff3b30; margin-top: 10px;">-2.1% vs mois dernier</div>
+                    </div>
+                    
+                    <div class="crypto-card" style="text-align: center;">
+                        <div style="font-size: 48px; margin-bottom: 10px;">💳</div>
+                        <div style="font-size: 32px; font-weight: 700; margin-bottom: 10px;">${app.tpeTransactions.length}</div>
+                        <div style="color: #8e8e93;">Transactions total</div>
+                        <div style="color: #34c759; margin-top: 10px;">+${app.tpeTransactions.filter(tx => isToday(tx.date)).length} aujourd'hui</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 40px;">
+                    <h3 style="margin-bottom: 20px;">Revenus Journaliers</h3>
+                    <div class="calendar-navigation">
+                        <button class="action-btn" onclick="changeMonth(-1)">← Précédent</button>
+                        <h4 id="currentMonthYear">Mai 2025</h4> <button class="action-btn" onclick="changeMonth(1)">Suivant →</button>
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid">
+                        </div>
+                    <div class="daily-revenue-list" id="dailyRevenueList">
+                        <p style="text-align: center; color: #8e8e93; padding: 20px;">Sélectionnez une date pour voir les revenus.</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateCryptoStats() {
+            const cryptoStats = {};
+            app.tpeTransactions.forEach(tx => {
+                if (tx.status === 'completed') {
+                    if (!cryptoStats[tx.crypto]) {
+                        cryptoStats[tx.crypto] = { count: 0, total: 0 };
+                    }
+                    cryptoStats[tx.crypto].count++;
+                    cryptoStats[tx.crypto].total += tx.amount;
+                }
+            });
+            
+            if (Object.keys(cryptoStats).length === 0) {
+                return '<p style="text-align: center; color: #8e8e93; padding: 40px;">Aucune donnée disponible</p>';
+            }
+            
+            return Object.entries(cryptoStats).map(([crypto, stats]) => `
+                <div class="activity-item">
+                    <div class="activity-icon received" style="font-size: 20px;">
+                        ${crypto === 'LIGHTNING' ? '⚡' : crypto.charAt(0)}
+                    </div>
+                    <div class="activity-details">
+                        <div class="activity-title">${crypto}</div>
+                        <div class="activity-subtitle">${stats.count} transactions</div>
+                    </div>
+                    <div class="activity-amount">
+                        <div class="activity-crypto">${formatCurrency(stats.total)} CHF</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // NFT Gallery
+        function generateNFTGallery() {
+            const nfts = [
+                {id: 1, name: 'CryptoPunk #1337', price: '12.5 ETH', rarity: 'Legendary'},
+                {id: 2, name: 'Bored Ape #4242', price: '8.3 ETH', rarity: 'Rare'},
+                {id: 3, name: 'Art Collection #99', price: '2.1 ETH', rarity: 'Common'},
+                {id: 4, name: 'Digital Genesis', price: '45.0 ETH', rarity: 'Mythic'},
+                {id: 5, name: 'Pixel Art #256', price: '3.2 ETH', rarity: 'Rare'},
+                {id: 6, name: 'Abstract #777', price: '1.8 ETH', rarity: 'Common'}
+            ];
+            
+            return `
+                <div class="dashboard-header">
+                    <h1 class="page-title">Collection NFT</h1>
+                </div>
+                
+                <div class="crypto-grid">
+                    ${nfts.map(nft => `
+                        <div class="crypto-card" style="cursor: pointer;">
+                            <div style="height: 200px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; font-size: 72px;">
+                                🎨
+                            </div>
+                            <h3 style="margin-bottom: 10px;">${nft.name}</h3>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="color: #8e8e93;">${nft.price}</span>
+                                <span style="background: ${nft.rarity === 'Mythic' ? '#ff6b6b' : nft.rarity === 'Legendary' ? '#ffd43b' : nft.rarity === 'Rare' ? '#4dabf7' : '#51cf66'}; padding: 5px 10px; border-radius: 10px; font-size: 12px;">
+                                    ${nft.rarity}
+                                </span>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // Staking
+        function generateStaking() {
+            const stakingOptions = [
+                {crypto: 'ETH', apy: '5.2%', locked: 0.5, available: Math.max(0, app.balance.ETH - 0.5)},
+                {crypto: 'ADA', apy: '4.8%', locked: 1000, available: Math.max(0, app.balance.ADA - 1000)},
+                {crypto: 'DOT', apy: '12.5%', locked: 50, available: Math.max(0, app.balance.DOT - 50)}
+            ];
+            
+            return `
+                <div class="dashboard-header">
+                    <h1 class="page-title">Staking</h1>
+                </div>
+                
+                <div class="crypto-grid">
+                    ${stakingOptions.map(option => `
+                        <div class="crypto-card">
+                            <h3 style="margin-bottom: 20px;">${option.crypto} Staking</h3>
+                            <div style="text-align: center; margin-bottom: 20px;">
+                                <div style="font-size: 48px; font-weight: 700; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                                    ${option.apy}
+                                </div>
+                                <div style="color: #8e8e93;">APY</div>
+                            </div>
+                            <div style="margin-bottom: 20px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                    <span>Verrouillé:</span>
+                                    <span>${option.locked} ${option.crypto}</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span>Disponible:</span>
+                                    <span>${option.available.toFixed(6)} ${option.crypto}</span>
+                                </div>
+                            </div>
+                            <button class="submit-btn" onclick="openStakeModal('${option.crypto}')">Staker plus</button>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function openStakeModal(crypto) {
+            const content = `
+                <div class="form-group">
+                    <label class="form-label">Montant à staker</label>
+                    <input type="number" class="input-field" id="stakeAmount" placeholder="0.000000">
+                    <small style="color: #8e8e93;">Disponible: ${app.balance[crypto].toFixed(6)} ${crypto}</small>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Durée de verrouillage</label>
+                    <select class="input-field">
+                        <option>30 jours - 3.5% APY</option>
+                        <option>60 jours - 4.2% APY</option>
+                        <option>90 jours - 5.2% APY</option>
+                        <option>180 jours - 6.8% APY</option>
+                        <option>365 jours - 8.5% APY</option>
+                    </select>
+                </div>
+                
+                <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 15px; margin: 20px 0;">
+                    <h4 style="margin-bottom: 10px;">Estimation des gains</h4>
+                    <div style="font-size: 24px; font-weight: 600; color: #34c759;">+0.0000 ${crypto}</div>
+                    <small style="color: #8e8e93;">Basé sur l'APY actuel</small>
+                </div>
+                
+                <button class="submit-btn" onclick="stakeCrypto('${crypto}')">Confirmer le staking</button>
+            `;
+            openModal(`Staker ${crypto}`, content);
+        }
+
+        function stakeCrypto(crypto) {
+            const amount = parseFloat(document.getElementById('stakeAmount').value);
+            
+            if (!amount || amount <= 0) {
+                showNotification('Erreur', 'Veuillez entrer un montant valide', 'error');
+                return;
+            }
+            
+            if (amount > app.balance[crypto]) {
+                showNotification('Erreur', 'Solde insuffisant', 'error');
+                return;
+            }
+            
+            app.balance[crypto] -= amount;
+            
+            addActivity({
+                type: 'swap',
+                title: `Staking ${crypto}`,
+                subtitle: '90 jours @ 5.2% APY',
+                amount: `${amount.toFixed(6)} ${crypto}`,
+                value: 'Verrouillé en staking'
+            });
+            
+            closeModal();
+            showNotification('Succès', `${amount.toFixed(6)} ${crypto} staké avec succès!`, 'success');
+            updateTotalBalance();
+            loadMainContent();
+        }
+
+        // Settings
+        function generateSettings() {
+            return `
+                <div class="dashboard-header">
+                    <h1 class="page-title">Paramètres</h1>
+                </div>
+                
+                <div style="max-width: 800px;">
+                    <div class="invoice-section" style="margin-bottom: 20px;">
+                        <h3 style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1);">Sécurité</h3>
+                        <div class="setting-item">
+                            <span>Changer le code PIN</span>
+                            <button class="action-btn" onclick="openChangePinModal()">Modifier</button>
+                        </div>
+                        <div class="setting-item">
+                            <span>Verrouillage automatique</span>
+                            <div class="toggle-switch ${app.settings.autoLock ? 'active' : ''}" onclick="toggleSetting('autoLock')"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="invoice-section" style="margin-bottom: 20px;">
+                        <h3 style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1);">Notifications</h3>
+                        <div class="setting-item">
+                            <span>Notifications push</span>
+                            <div class="toggle-switch ${app.settings.notifications ? 'active' : ''}" onclick="toggleSetting('notifications')"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="invoice-section">
+                        <h3 style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1);">Préférences</h3>
+                        <div class="setting-item">
+                            <span>Devise par défaut</span>
+                            <select class="input-field" style="width: 150px;">
+                                <option>CHF</option>
+                                <option>EUR</option>
+                                <option>USD</option>
+                            </select>
+                        </div>
+                        <div class="setting-item">
+                            <span>Mode sombre</span>
+                            <div class="toggle-switch active" onclick="toggleSetting('darkMode')"></div>
+                        </div>
+                        <div class="setting-item">
+                            <span>Version de l'application</span>
+                            <span style="color: #8e8e93;">v2.1.0</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Helper functions
+        function addActivity(activity) {
+            activity.id = Date.now().toString();
+            activity.timestamp = new Date();
+            app.activities.unshift(activity);
+            
+            // Keep only last 100 activities
+            if (app.activities.length > 100) {
+                app.activities = app.activities.slice(0, 100);
+            }
+        }
+
+        function updateTotalBalance() {
+            const totalBalance = calculateTotalBalance();
+            const balanceElement = document.getElementById('totalBalance');
+            if (balanceElement) {
+                balanceElement.textContent = `${formatCurrency(totalBalance)} CHF`;
+            }
+        }
+
+        function isToday(date) {
+            const today = new Date();
+            return date.toDateString() === today.toDateString();
+        }
+
+        function showActivityDetails(activityId) {
+            const activity = app.activities.find(a => a.id === activityId);
+            if (!activity) return;
+            
+            const content = `
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <div style="font-size: 48px; margin-bottom: 10px;">
+                        ${activity.type === 'received' ? '📥' : 
+                          activity.type === 'sent' ? '📤' : 
+                          activity.type === 'swap' ? '🔄' :
+                          activity.type === 'buy' ? '💳' : 
+                          activity.type === 'sell' ? '💰' : '✅'}
+                    </div>
+                    <h3>${activity.title}</h3>
+                </div>
+                
+                <div style="background: rgba(255,255,255,0.05); border-radius: 15px; padding: 20px; margin: 20px 0;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span>Montant:</span>
+                        <span style="font-weight: 600;">${activity.amount}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span>Valeur:</span>
+                        <span style="font-weight: 600;">${activity.value}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span>Description:</span>
+                        <span>${activity.subtitle}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Date:</span>
+                        <span>${activity.timestamp.toLocaleString()}</span>
+                    </div>
+                </div>
+            `;
+            
+            openModal('Détails de la transaction', content);
+        }
+
+        function showTPETransactionDetails(transactionId) {
+            const transaction = app.tpeTransactions.find(t => t.id === transactionId);
+            if (!transaction) return;
+            
+            const content = `
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <div style="font-size: 48px; margin-bottom: 10px;">💳</div>
+                    <h3>Transaction TPE</h3>
+                </div>
+                
+                <div style="background: rgba(255,255,255,0.05); border-radius: 15px; padding: 20px; margin: 20px 0;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span>ID Transaction:</span>
+                        <span style="font-weight: 600;">${transaction.id}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span>Montant facturé:</span>
+                        <span style="font-weight: 600;">${transaction.amount} ${transaction.currency}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span>Payé en:</span>
+                        <span style="font-weight: 600;">${transaction.cryptoAmount.toFixed(6)} ${transaction.crypto}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span>Statut:</span>
+                        <span style="color: ${transaction.status === 'completed' ? '#34c759' : '#ff9500'}">${transaction.status === 'completed' ? 'Complété' : 'En attente'}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Heure:</span>
+                        <span>${transaction.date.toLocaleString()}</span>
+                    </div>
+                </div>
+            `;
+            
+            openModal('Détails Transaction TPE', content);
+        }
+
+        function openCryptoDetails(crypto) {
+            const balance = app.balance[crypto];
+            const price = app.cryptoPrices[crypto];
+            const value = balance * price;
+            
+            const content = `
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; font-size: 40px; margin: 0 auto 20px;">
+                        ${crypto === 'LIGHTNING' ? '⚡' : crypto.charAt(0)}
+                    </div>
+                    <h3>${crypto}</h3>
+                </div>
+                
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <div style="font-size: 48px; font-weight: 700;">${balance.toFixed(6)} ${crypto}</div>
+                    <div style="font-size: 24px; color: #8e8e93;">${formatCurrency(value)} CHF</div>
+                    <div style="font-size: 16px; margin-top: 10px;">@ ${formatCurrency(price)} CHF</div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                    <button class="action-btn" onclick="closeModal(); openSendModal();" style="justify-content: center;">
+                        📤 Envoyer
+                    </button>
+                    <button class="action-btn" onclick="closeModal(); openReceiveModal();" style="justify-content: center;">
+                        📥 Recevoir
+                    </button>
+                    <button class="action-btn" onclick="closeModal(); openBuyModal();" style="justify-content: center;">
+                        💳 Acheter
+                    </button>
+                    <button class="action-btn" onclick="closeModal(); openSellModal();" style="justify-content: center;">
+                        💰 Vendre
+                    </button>
+                </div>
+            `;
+            
+            openModal(`${crypto} - Détails`, content);
+        }
+
+        function toggleSetting(setting) {
+            app.settings[setting] = !app.settings[setting];
+            event.currentTarget.classList.toggle('active');
+            showNotification('Paramètres', `${setting} ${app.settings[setting] ? 'activé' : 'désactivé'}`, 'info');
+        }
+
+        function openChangePinModal() {
+            const content = `
+                <div class="form-group">
+                    <label class="form-label">Code PIN actuel</label>
+                    <input type="password" class="input-field" id="currentPin" maxlength="6">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Nouveau code PIN</label>
+                    <input type="password" class="input-field" id="newPin" maxlength="6">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Confirmer le nouveau PIN</label>
+                    <input type="password" class="input-field" id="confirmPin" maxlength="6">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Longueur du PIN (4-6 chiffres)</label>
+                  <select class="input-field" id="newPinLength">
+                    <option value="4" ${app.settings.pinLength === 4 ? 'selected' : ''}>4 chiffres</option>
+                    <option value="5" ${app.settings.pinLength === 5 ? 'selected' : ''}>5 chiffres</option>
+                    <option value="6" ${app.settings.pinLength === 6 ? 'selected' : ''}>6 chiffres</option>
+                  </select>
+                </div>
+                
+                <button class="submit-btn" onclick="changePin()">Changer le PIN</button>
+            `;
+            openModal('Changer le code PIN', content);
+        }
+
+        function openProfileSettings() {
+          const content = `
+            <div class="form-group">
+              <label class="form-label">Votre pseudo</label>
+              <input type="text" class="input-field" id="newUserName" value="${app.settings.userName}" placeholder="Entrez votre pseudo">
+            </div>
+
+            <button class="submit-btn" onclick="changeUserName()">Enregistrer le pseudo</button>
+          `;
+          openModal('Paramètres du profil', content);
+        }
+
+        function changeUserName() {
+          const newUserName = document.getElementById('newUserName').value;
+
+          if (newUserName.trim() === '') {
+            showNotification('Erreur', 'Le pseudo ne peut pas être vide.', 'error');
+            return;
+          }
+
+          app.settings.userName = newUserName; // Met à jour le pseudo dans les réglages de l'application
+          document.getElementById('userNameDisplay').textContent = newUserName; // Met à jour le pseudo affiché dans l'en-tête
+          closeModal();
+          showNotification('Succès', 'Pseudo mis à jour avec succès!', 'success');
+        }
+
+        function changePin() {
+            const currentPin = document.getElementById('currentPin').value;
+            const newPin = document.getElementById('newPin').value;
+            const confirmPin = document.getElementById('confirmPin').value;
+            const newPinLength = parseInt(document.getElementById('newPinLength').value);
+            
+            if (currentPin !== app.settings.pin) {
+                showNotification('Erreur', 'Code PIN actuel incorrect', 'error');
+                return;
+            }
+            
+            if (newPin.length !== newPinLength) {
+                showNotification('Erreur', 'Le PIN doit contenir entre 4 et 6 chiffres', 'error');
+                return;
+            }
+            
+            if (newPin !== confirmPin) {
+                showNotification('Erreur', 'Les codes PIN ne correspondent pas', 'error');
+                return;
+            }
+            
+            app.settings.pin = newPin;
+            app.settings.pinLength = newPinLength; // METTRE À JOUR LA LONGUEUR ICI
+            app.settings.pinLength = newPin.length;
+            
+            closeModal();
+            showNotification('Succès', 'Code PIN changé avec succès!', 'success');
+            updatePinDots(); // Re-dessine les points à l'écran de connexion avec la nouvelle longueur
+        }
+
+        function logout() {
+          app.pin = ''; // Vide le PIN actuel
+          document.getElementById('loginScreen').style.display = 'flex'; // Affiche l'écran de connexion
+          document.getElementById('appContainer').style.display = 'none'; // Cache l'application principale
+          showNotification('Déconnexion réussie', 'À bientôt, Alexandre!', 'info'); // Message de confirmation
+          // Optionnel : Réinitialiser le pseudo à la déconnexion, ou le charger depuis le stockage
+          document.getElementById('userNameDisplay').textContent = app.settings.userName; // Remet le nom par défaut ou dernier sauvegardé
+          updatePinDots(); // Réinitialise les points du PIN pour la saisie
+        }
+
+        // Notifications
+        function showNotification(title, message, type = 'info') {
+            const container = document.getElementById('notificationContainer');
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            
+            const icons = {
+                success: '✅',
+                error: '❌',
+                info: 'ℹ️'
+            };
+            
+            notification.innerHTML = `
+                <div class="notification-icon">${icons[type]}</div>
+                <div class="notification-content">
+                    <div class="notification-title">${title}</div>
+                    <div class="notification-message">${message}</div>
+                </div>
+            `;
+            
+            container.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => notification.remove(), 300);
+            }, 5000);
+        }
+
+        // Real-time Price Updates
+        function updateRealTimePrices() {
+            setInterval(() => {
+                // Simulate price changes
+                for (let crypto in app.cryptoPrices) {
+                    if (crypto === 'CHFM') {
+                        // CHFM reste stable à 1 CHF
+                        app.cryptoPrices[crypto] = 1.00;
+                    } else {
+                        const change = (Math.random() - 0.5) * 0.02; // ±1% change
+                        app.cryptoPrices[crypto] *= (1 + change);
+                    }
+                }
+                
+                // Update display if on dashboard
+                if (app.currentView === 'dashboard') {
+                    updateTotalBalance();
+                    const cryptoGrid = document.getElementById('cryptoGrid');
+                    if (cryptoGrid) {
+                        cryptoGrid.innerHTML = generateCryptoCards();
+                    }
+                }
+            }, 5000);
+        }
+
+        function logout() {
+            app.pin = '';
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('appContainer').style.display = 'none';
+            showNotification('Déconnexion', 'À bientôt!', 'info');
+        }
+
+        // Initialize
+        window.onload = function() {
+            // Appelle cette fonction pour dessiner les points du PIN au démarrage
+            updatePinDots();
+
+            // 1. Initialiser app.activities avec ses données initiales
+            app.activities = [
+                {
+                    id: '1',
+                    type: 'received',
+                    title: 'Dépôt Bitcoin Lightning',
+                    subtitle: 'Réception instantanée',
+                    amount: '+0.025 BTC',
+                    value: `+${formatCurrency(0.025 * app.cryptoPrices.BTC)} CHF`,
+                    timestamp: new Date(Date.now() - 3600000)
+                },
+                {
+                    id: '2',
+                    type: 'swap',
+                    title: 'Échange ETH → CHFM',
+                    subtitle: 'Conversion automatique',
+                    amount: '0.5 ETH',
+                    value: '1228 CHFM',
+                    timestamp: new Date(Date.now() - 7200000)
+                },
+                {
+                    id: '3',
+                    type: 'sent',
+                    title: 'Envoi USDC',
+                    subtitle: 'Vers 0x742d...357e',
+                    amount: '-100 USDC',
+                    value: `-${formatCurrency(100)} CHF`,
+                    timestamp: new Date(Date.now() - 10800000)
+                }
+            ]; // <--- NOTEZ LA VIRGULE OU LE POINT-VIRGULE ICI si c'est la fin du bloc d'initialisation de 'app.activities'
+
+
+            // 2. Ensuite, ajoute les transactions TPE dans app.tpeTransactions
+            // (si tu veux des données de test initiales comme on l'avait vu)
+            app.tpeTransactions.push(
+                {
+                    id: `TPE${Date.now()}-old1`,
+                    amount: 50.00,
+                    currency: 'CHF',
+                    crypto: 'CHFM',
+                    cryptoAmount: 50,
+                    time: '10:30',
+                    status: 'completed',
+                    date: new Date(2025, 4, 15, 10, 30) // 15 mai 2025
+                },
+                {
+                    id: `TPE${Date.now()}-old2`,
+                    amount: 75.50,
+                    currency: 'CHF',
+                    crypto: 'BTC',
+                    cryptoAmount: 0.00178,
+                    time: '14:45',
+                    status: 'completed',
+                    date: new Date(2025, 4, 20, 14, 45) // 20 mai 2025
+                },
+                {
+                    id: `TPE${Date.now()}-old3`,
+                    amount: 120.00,
+                    currency: 'CHF',
+                    crypto: 'ETH',
+                    cryptoAmount: 0.0488,
+                    time: '11:00',
+                    status: 'completed',
+                    date: new Date(2025, 3, 28, 11, 0) // 28 avril 2025 (Mois 3 = Avril car les mois sont de 0 à 11)
+                }
+            );
+
+            // Simulate end of day conversion check every minute
+            setInterval(() => {
+                const now = new Date();
+                if (now.getHours() === 23 && now.getMinutes() === 59 && app.pendingSwaps.length > 0) {
+                 executeAllPendingSwaps();
+                }
+            }, 60000);
+        };
+        
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth < 768) {
+                document.querySelector('.sidebar').style.display = 'none';
+            } else {
+                document.querySelector('.sidebar').style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
